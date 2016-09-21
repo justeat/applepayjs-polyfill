@@ -4,13 +4,301 @@
 (function () {
     if ("ApplePaySession" in window === false) {
 
+        /**
+         * Object used to drive the ApplePaySession polyfill.
+         */
+        ApplePaySessionPolyfill = (function () {
+
+            var self = {};
+
+            self.hasActiveSession = false;
+            self.paymentsEnabled = true;
+            self.paymentRequest = null;
+            self.merchantIdentifier = "";
+            self.validationURL = "https://apple-pay-gateway-cert.apple.com/paymentservices/startSession";
+            self.version = 1;
+
+            /**
+             * Disables payments with ApplePaySession.
+             */
+            self.disablePayments = function () {
+                self.paymentsEnabled = false;
+            };
+
+            /**
+             * Enables payments with ApplePaySession.
+             */
+            self.enablePayments = function () {
+                self.paymentsEnabled = true;
+            };
+
+            /**
+             * Sets the merchant identifier to use for payment.
+             * @param {String} merchantIdentifier - The merchant identifier to use.
+             */
+            self.setMerchantIdentifier = function (merchantIdentifier) {
+                self.merchantIdentifier = merchantIdentifier;
+            };
+
+            /**
+             * Sets the validation URL to use for merchant validation.
+             * @param {String} validationURL - The URL to use for merchant validation.
+             */
+            self.setValidationURL = function (validationURL) {
+                self.validationURL = validationURL;
+            };
+
+            /**
+             * Creates a PaymentContact to use for billing.
+             * @param {Object} session - The current ApplePaySession.
+             * @returns {PaymentContact} The PaymentContact created for billing.
+             */
+            self.createBillingContact = function (session) {
+                throw "You must implement ApplePaySessionPolyfill.createBillingContact()";
+            };
+
+            /**
+             * Creates a PaymentContact to use for shipping.
+             * @param {Object} session - The current ApplePaySession.
+             * @returns {PaymentContact} The PaymentContact created for shipping.
+             */
+            self.createShippingContact = function (session) {
+                throw "You must implement ApplePaySessionPolyfill.createShippingContact()";
+            };
+
+            /**
+             * Creates a PaymentToken for an authorized payment.
+             * @param {Object} session - The current ApplePaySession.
+             * @returns {PaymentToken} The PaymentToken created for an authorized payment.
+             */
+            self.createPaymentToken = function (session) {
+                throw "You must implement ApplePaySessionPolyfill.createPaymentToken()";
+            };
+
+            /**
+             * Callback for when a new ApplePaySession is initialized.
+             * @param {Object} session - The current ApplePaySession.
+             * @param {Number} version - The version passed to the ApplePaySession.
+             * @param {PaymentRequest} paymentRequest - The payment request passed to the ApplePaySession.
+             */
+            self.onInit = function (session, version, paymentRequest) {
+
+                if (self.hasActiveSession === true) {
+                    throw "Page already has an active payment session.";
+                }
+
+                if (version !== self.version) {
+                    throw "\"" + version + "\" is not a supported version.";
+                }
+
+                if (!paymentRequest || !("countryCode" in paymentRequest)) {
+                    throw "Missing country code.";
+                }
+
+                var countryCodes = ["AU", "CA", "CH", "CN", "FR", "GB", "HK", "SG", "US"];
+                var currencyCodes = ["AUD", "CAD", "CHF", "CNY", "EUR", "GBP", "HKD", "SGD", "USD"];
+                var merchantCapabilities = ["supports3DS", "supportsEMV", "supportsCredit", "supportsDebit"];
+                var paymentNetworks = ["amex", "discover", "interac", "masterCard", "privateLabel", "visa"];
+
+                if (countryCodes.indexOf(paymentRequest.countryCode) === -1) {
+                    throw "\"" + paymentRequest.countryCode + "\" is not valid country code.";
+                }
+
+                if (!("currencyCode" in paymentRequest)) {
+                    throw "Missing currency code.";
+                }
+
+                if (currencyCodes.indexOf(paymentRequest.currencyCode) === -1) {
+                    throw "\"" + paymentRequest.currencyCode + "\" is not valid currency code.";
+                }
+
+                if (!("supportedNetworks" in paymentRequest) || paymentRequest.supportedNetworks.length === 0) {
+                    throw "Missing supported networks";
+                }
+
+                var i;
+
+                for (i = 0; i < paymentRequest.supportedNetworks.length; i++) {
+                    var network = paymentRequest.supportedNetworks[i];
+                    if (paymentNetworks.indexOf(network) === -1) {
+                        throw "\"" + network + "\" is not valid payment network.";
+                    }
+                }
+
+                if (!("merchantCapabilities" in paymentRequest) || paymentRequest.merchantCapabilities.length === 0) {
+                    throw "Missing merchant capabilities";
+                }
+
+                for (i = 0; i < paymentRequest.merchantCapabilities.length; i++) {
+                    var capability = paymentRequest.merchantCapabilities[i];
+                    if (merchantCapabilities.indexOf(capability) === -1) {
+                        throw "\"" + capability + "\" is not valid merchant capability.";
+                    }
+                }
+
+                if (!("total" in paymentRequest) || !("label" in paymentRequest.total)) {
+                    throw "Missing total label.";
+                }
+
+                if (!("amount" in paymentRequest.total)) {
+                    throw "Missing total amount.";
+                }
+
+                if (/^[0-9]+(\.[0-9][0-9])?$/.test(paymentRequest.total.amount) !== true) {
+                    throw "\"" + paymentRequest.total.amount + "\" is not a valid amount.";
+                }
+
+                self.hasActiveSession = true;
+                self.paymentRequest = paymentRequest;
+            };
+
+            /**
+             * Callback for ApplePaySession.abort().
+             * @param {Object} session - The current ApplePaySession.
+             */
+            self.onAbort = function (session) {
+            };
+
+            /**
+             * Callback for ApplePaySession.begin().
+             * @param {Object} session - The current ApplePaySession.
+             */
+            self.onBegin = function (session) {
+
+                var applePayValidateMerchantEvent = {
+                    validationURL: self.validationURL
+                };
+
+                session.onvalidatemerchant(applePayValidateMerchantEvent);
+            };
+
+            /**
+             * Callback for ApplePaySession.canMakePayments().
+             * @param {Object} session - The current ApplePaySession.
+             * @return {Boolean} The value to return from ApplePaySession.canMakePayments().
+             */
+            self.onCanMakePayments = function (session) {
+                return self.paymentsEnabled === true;
+            };
+
+            /**
+             * Callback for ApplePaySession.canMakePaymentsWithActiveCard().
+             * @param {Object} session - The current ApplePaySession.
+             * @param {String} merchantIdentifier - The merchant identifier passed to the function.
+             * @return {Boolean} The value to return from ApplePaySession.canMakePaymentsWithActiveCard().
+             */
+            self.onCanMakePaymentsWithActiveCard = function (session, merchantIdentifier) {
+
+                var result =
+                       self.paymentsEnabled === true &&
+                       merchantIdentifier &&
+                       merchantIdentifier === self.merchantIdentifier;
+
+                return Promise.resolve(result);
+            };
+
+            /**
+             * Callback for ApplePaySession.completeMerchantValidation().
+             * @param {Object} session - The current ApplePaySession.
+             * @param {MerchantSession} merchantSession - The merchant session passed to the function.
+             */
+            self.onCompleteMerchantValidation = function (session, merchantSession) {
+
+                if (typeof session.onshippingcontactselected === "function") {
+
+                    var applePayShippingContactSelectedEvent = {
+                        shippingContact: self.createShippingContact(session)
+                    };
+
+                    session.onshippingcontactselected(applePayShippingContactSelectedEvent);
+                } else {
+                    var applePayPaymentAuthorizedEvent = {
+                        payment: {
+                            token: self.createPaymentToken(session),
+                            billingContact: self.createBillingContact(session),
+                            shippingContact: self.createShippingContact(session)
+                        }
+                    };
+                    session.onpaymentauthorized(applePayPaymentAuthorizedEvent);
+                }
+            };
+
+            /**
+             * Callback for ApplePaySession.completePayment().
+             * @param {Object} session - The current ApplePaySession.
+             * @param {Number} status - The status code passed to the function.
+             */
+            self.onCompletePayment = function (session, status) {
+                self.hasActiveSession = false;
+                self.paymentRequest = null;
+            };
+
+            /**
+             * Callback for ApplePaySession.completePaymentMethodSelection().
+             * @param {Object} session - The current ApplePaySession.
+             * @param {Object} newTotal - The new total passed to the function.
+             * @param {Object} newLineItems - The new line items passed to the function.
+             */
+            self.onCompletePaymentMethodSelection = function (session, newTotal, newLineItems) {
+
+            };
+
+            /**
+             * Callback for ApplePaySession.completeShippingContactSelection().
+             * @param {Object} session - The current ApplePaySession.
+             * @param {Number} status - The status code passed to the function.
+             * @param {Object} newShippingMethods - The new shipping methods passed to the function.
+             * @param {Object} newTotal - The new total passed to the function.
+             * @param {Object} newLineItems - The new line items passed to the function.
+             */
+            self.onCompleteShippingContactSelection = function (session, status, newShippingMethods, newTotal, newLineItems) {
+
+                if (status === ApplePaySession.STATUS_SUCCESS) {
+                    var applePayPaymentAuthorizedEvent = {
+                        payment: {
+                            token: self.createPaymentToken(session),
+                            billingContact: self.createBillingContact(session),
+                            shippingContact: self.createShippingContact(session)
+                        }
+                    };
+                    session.onpaymentauthorized(applePayPaymentAuthorizedEvent);
+                }
+            };
+
+            /**
+             * Callback for ApplePaySession.completeShippingMethodSelection().
+             * @param {Object} session - The current ApplePaySession.
+             * @param {Number} status - The status code passed to the function.
+             * @param {Object} newTotal - The new total passed to the function.
+             * @param {Object} newLineItems - The new line items passed to the function.
+             */
+            self.onCompleteShippingMethodSelection = function (session, status, newTotal, newLineItems) {
+
+            };
+
+            /**
+             * Callback for ApplePaySession.supportsVersion().
+             * @param {Object} session - The current ApplePaySession.
+             * @param {Number} version - The version passed to the function.
+             * @return {Boolean} The value to return from ApplePaySession.supportsVersion().
+             */
+            self.onSupportsVersion = function (session, version) {
+                return version === self.version;
+            };
+
+            return self;
+        })();
+
         ApplePaySession = function (version, request) {
+
             this.oncancel = null;
             this.onpaymentauthorized = null;
             this.onpaymentmethodselected = null;
             this.onshippingcontactselected = null;
             this.onshippingmethodselected = null;
             this.onvalidatemerchant = null;
+
+            ApplePaySessionPolyfill.onInit(this, version, request);
         };
 
         ApplePaySession.STATUS_SUCCESS = 0;
@@ -22,120 +310,44 @@
         ApplePaySession.STATUS_PIN_INCORRECT = 6;
         ApplePaySession.STATUS_PIN_LOCKOUT = 7;
 
-        // Add your own token here intercepted from the browser console from a
-        // transaction using your Merchant Identity Certificate with sandbox tester.
-        ApplePaySession.paymentToken = {
-            paymentData: {
-                data: "",
-                signature: "",
-                header: {
-                    publicKeyHash: "",
-                    ephemeralPublicKey: "",
-                    transactionId: ""
-                },
-                version: ""
-            },
-            transactionIdentifier: "",
-            paymentMethod: {
-                network: "",
-                type: "",
-                displayName: ""
-            }
-        };
-
         ApplePaySession.canMakePayments = function () {
-            return true;
+            return ApplePaySessionPolyfill.onCanMakePayments(this);
         };
 
         ApplePaySession.canMakePaymentsWithActiveCard = function (merchantIdentifier) {
-            return Promise.resolve(true);
+            return ApplePaySessionPolyfill.onCanMakePaymentsWithActiveCard(this, merchantIdentifier);
         };
 
         ApplePaySession.supportsVersion = function (version) {
-            return version === 1;
+            return ApplePaySessionPolyfill.onSupportsVersion(this, version);
         };
 
         ApplePaySession.prototype.abort = function () {
+            ApplePaySessionPolyfill.onAbort(this);
         };
 
         ApplePaySession.prototype.begin = function () {
-
-            var event = {
-                validationURL: "https://apple-pay-gateway-cert.apple.com/paymentservices/startSession"
-            };
-
-            this.onvalidatemerchant(event);
+            ApplePaySessionPolyfill.onBegin(this);
         };
 
         ApplePaySession.prototype.completeMerchantValidation = function (merchantSession) {
-
-            // Populate shipping details and call the onshippingcontactselected
-            // function to simulate user interaction with the Apple Pay sheet.
-            var event = {
-                shippingContact: {
-                    emailAddress: "",
-                    phoneNumber: "",
-                    familyName: "",
-                    givenName: "",
-                    addressLines: [""],
-                    locality: "",
-                    postalCode: "",
-                    administrativeArea: "",
-                    country: "m",
-                    countryCode: ""
-                }
-            };
-
-            this.onshippingcontactselected(event);
+            ApplePaySessionPolyfill.onCompleteMerchantValidation(this, merchantSession);
         };
 
         ApplePaySession.prototype.completePayment = function (status) {
+            ApplePaySessionPolyfill.onCompletePayment(this, status);
         };
 
         ApplePaySession.prototype.completePaymentMethodSelection = function (newTotal, newLineItems) {
+            ApplePaySessionPolyfill.onCompletePaymentMethodSelection(this, newTotal, newLineItems);
         };
 
         ApplePaySession.prototype.completeShippingContactSelection = function (status, newShippingMethods, newTotal, newLineItems) {
-
-            if (status === ApplePaySession.STATUS_SUCCESS) {
-
-                // Populate billing and shipping details and call the onpaymentauthorized
-                // function to simulate user interaction with the Apple Pay sheet.
-                var event = {
-                    payment: {
-                        token: ApplePaySession.paymentToken,
-                        billingContact: {
-                            emailAddress: "",
-                            phoneNumber: "",
-                            familyName: "",
-                            givenName: "",
-                            addressLines: [""],
-                            locality: "",
-                            postalCode: "",
-                            administrativeArea: "",
-                            country: "",
-                            countryCode: ""
-                        },
-                        shippingContact: {
-                            emailAddress: "",
-                            phoneNumber: "",
-                            familyName: "",
-                            givenName: "",
-                            addressLines: [""],
-                            locality: "",
-                            postalCode: "",
-                            administrativeArea: "",
-                            country: "",
-                            countryCode: ""
-                        }
-                    }
-                };
-
-                this.onpaymentauthorized(event);
-            }
+            ApplePaySessionPolyfill.onCompleteShippingContactSelection(this, status, newShippingMethods, newTotal, newLineItems);
         };
 
         ApplePaySession.prototype.completeShippingMethodSelection = function (status, newTotal, newLineItems) {
+            ApplePaySessionPolyfill.onCompleteShippingMethodSelection(this, status, newTotal, newLineItems);
         };
     }
 }());
