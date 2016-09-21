@@ -1,0 +1,31 @@
+{
+  "name": "applepayjs-polyfill",
+  "description": "A JavaScript polyfill for Apple Pay JS.",
+  "private": true,
+  "authors": [
+    "Just Eat",
+    "Martin Costello"
+  ],
+  "homepage": "https://github.com/justeat/applepayjs-polyfill",
+  "ignore": [
+    "**/.*",
+    "bower_components",
+    "node_modules",
+    "test",
+    "tests"
+  ],
+  "keywords": [
+    "apple",
+    "pay",
+    "applepay",
+    "apple-pay",
+    "polyfill"
+  ],
+  "license": "Apache-2.0",
+  "main": "ApplePaySession.js",
+  "moduleType": "globals",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/justeat/applepayjs-polyfill.git"
+  }
+}
