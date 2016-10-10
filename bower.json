@@ -1,7 +1,7 @@
 {
   "name": "applepayjs-polyfill",
   "description": "A JavaScript polyfill for Apple Pay JS.",
-  "private": true,
+  "private": false,
   "authors": [
     "Just Eat",
     "Martin Costello"
