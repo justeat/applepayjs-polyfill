@@ -1,5 +1,7 @@
 # Apple Pay JS Polyfill
 
+[![Bower](https://img.shields.io/bower/v/applepayjs-polyfill.svg?maxAge=2592000)]()
+
 This repository contains a polyfill for [Apple Pay JS](https://developer.apple.com/reference/applepayjs) for use for testing on devices that do not natively support Apple Pay JS.
 
 ## Overview
