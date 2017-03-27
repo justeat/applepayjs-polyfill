@@ -12,6 +12,7 @@
             var self = {};
 
             self.hasActiveSession = false;
+            self.isApplePaySetUp = true;
             self.paymentsEnabled = true;
             self.paymentRequest = null;
             self.merchantIdentifier = "";
@@ -39,6 +40,14 @@
              */
             self.setMerchantIdentifier = function (merchantIdentifier) {
                 self.merchantIdentifier = merchantIdentifier;
+            };
+
+            /**
+             * Sets whether the user has set up Apple Pay.
+             * @param {Boolean} isSetUp - Whether Apple Pay has been set up by the user on the device.
+             */
+            self.setUserSetupStatus = function (isSetUp) {
+                self.isApplePaySetUp = isSetUp;
             };
 
             /**
@@ -282,6 +291,25 @@
             };
 
             /**
+             * Callback for ApplePaySession.openPaymentSetup().
+             * @param {Object} session - The current ApplePaySession.
+             * @param {String} merchantIdentifier - The merchant identifier passed to the function.
+             */
+            self.onOpenPaymentSetup = function (session, merchantIdentifier) {
+
+                var result =
+                    self.paymentsEnabled === true &&
+                    merchantIdentifier &&
+                    merchantIdentifier === self.merchantIdentifier;
+
+                if (result === true) {
+                    result = self.isApplePaySetUp;
+                }
+
+                return Promise.resolve(result);
+            };
+
+            /**
              * Callback for ApplePaySession.supportsVersion().
              * @param {Object} session - The current ApplePaySession.
              * @param {Number} version - The version passed to the function.
@@ -321,6 +349,10 @@
 
         ApplePaySession.canMakePaymentsWithActiveCard = function (merchantIdentifier) {
             return ApplePaySessionPolyfill.onCanMakePaymentsWithActiveCard(this, merchantIdentifier);
+        };
+
+        ApplePaySession.openPaymentSetup = function (merchantIdentifier) {
+            return ApplePaySessionPolyfill.onOpenPaymentSetup(this, merchantIdentifier);
         };
 
         ApplePaySession.supportsVersion = function (version) {
