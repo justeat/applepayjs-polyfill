@@ -10,6 +10,8 @@ Apple Pay JS is a way of accepting Apple Pay in websites using Safari in either 
 
 This polyfill provides a way to make [```ApplePaySession```](https://developer.apple.com/reference/applepayjs/applepaysession) available for testing your implementation in browsers that would otherwise not provide support for Apple Pay JS, such as in Chrome on Windows.
 
+The polyfill supports Apple Pay JS versions 1 and 2.
+
 ## Examples
 
 To create a minimal working integration using the polyfill, first install the JavaScript using [bower](https://bower.io/):
@@ -91,6 +93,22 @@ if ("ApplePaySession" in window && ApplePaySession.canMakePayments() === true) {
 
   });
 }
+```
+
+### Apple Pay Set Up
+
+If you need to test displaying the "Set Up Apple Pay" button, use the ```setUserSetupStatus(bool)``` function, as shown below, to specify that the user has not yet set up Apple Pay on the device.
+
+```js
+ApplePaySessionPolyfill.setUserSetupStatus(false);
+```
+
+By default this value is set to ```true``` so that Apple Pay is available in the polyfill.
+
+If you need to test compatibility with devices that do not support Apple Pay set up, then delete the function from ```ApplePaySession``` before your implementation code is loaded:
+
+```js
+delete ApplePaySession.openPaymentSetup;
 ```
 
 ## Feedback
