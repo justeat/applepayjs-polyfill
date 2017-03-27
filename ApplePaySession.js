@@ -15,6 +15,7 @@
             self.paymentsEnabled = true;
             self.paymentRequest = null;
             self.merchantIdentifier = "";
+            self.supportedVersions = [1, 2];
             self.validationURL = "https://apple-pay-gateway-cert.apple.com/paymentservices/startSession";
             self.version = 1;
 
@@ -87,7 +88,7 @@
                     throw "Page already has an active payment session.";
                 }
 
-                if (version !== self.version) {
+                if (self.supportedVersions.indexOf(version) === -1) {
                     throw "\"" + version + "\" is not a supported version.";
                 }
 
@@ -99,6 +100,10 @@
                 var currencyCodes = ["AUD", "CAD", "CHF", "CNY", "EUR", "GBP", "HKD", "SGD", "USD"];
                 var merchantCapabilities = ["supports3DS", "supportsEMV", "supportsCredit", "supportsDebit"];
                 var paymentNetworks = ["amex", "discover", "interac", "masterCard", "privateLabel", "visa"];
+
+                if (version > 1) {
+                    paymentNetworks.push("jcb");
+                }
 
                 if (countryCodes.indexOf(paymentRequest.countryCode) === -1) {
                     throw "\"" + paymentRequest.countryCode + "\" is not valid country code.";
@@ -190,9 +195,9 @@
             self.onCanMakePaymentsWithActiveCard = function (session, merchantIdentifier) {
 
                 var result =
-                       self.paymentsEnabled === true &&
-                       merchantIdentifier &&
-                       merchantIdentifier === self.merchantIdentifier;
+                    self.paymentsEnabled === true &&
+                    merchantIdentifier &&
+                    merchantIdentifier === self.merchantIdentifier;
 
                 return Promise.resolve(result);
             };
@@ -283,7 +288,7 @@
              * @return {Boolean} The value to return from ApplePaySession.supportsVersion().
              */
             self.onSupportsVersion = function (session, version) {
-                return version === self.version;
+                return self.supportedVersions.indexOf(version) !== -1;
             };
 
             return self;
