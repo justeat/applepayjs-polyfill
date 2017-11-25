@@ -6,11 +6,11 @@ This repository contains a polyfill for [Apple Pay JS](https://developer.apple.c
 
 ## Overview
 
-Apple Pay JS is a way of accepting Apple Pay in websites using Safari in either iOS 10 and macOS for users who have a TouchID compatible device.
+Apple Pay JS is a way of accepting Apple Pay in websites using Safari in either iOS 10 (and later) and macOS for users who have a TouchID compatible device.
 
 This polyfill provides a way to make [```ApplePaySession```](https://developer.apple.com/reference/applepayjs/applepaysession) available for testing your implementation in browsers that would otherwise not provide support for Apple Pay JS, such as in Chrome on Windows.
 
-The polyfill supports Apple Pay JS versions 1 and 2.
+The polyfill supports Apple Pay JS versions 1, 2 and 3.
 
 ## Examples
 
@@ -79,7 +79,7 @@ if ("ApplePaySession" in window && ApplePaySession.canMakePayments() === true) {
       }
     };
 
-    var session = new ApplePaySession(1, paymentRequest);
+    var session = new ApplePaySession(3, paymentRequest);
 
     session.onvalidatemerchant = function (event) {
       /* Merchant validation implementation */
