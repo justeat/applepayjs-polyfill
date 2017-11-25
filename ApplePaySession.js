@@ -105,8 +105,8 @@
                     throw "Missing country code.";
                 }
 
-                var countryCodes = ["AU", "CA", "CH", "CN", "FR", "GB", "HK", "SG", "US"];
-                var currencyCodes = ["AUD", "CAD", "CHF", "CNY", "EUR", "GBP", "HKD", "SGD", "USD"];
+                var countryCodes = ["AE", "AU", "CA", "CH", "CN", "DK", "ES", "FR", "FI", "GB", "GG", "HK", "IE", "IM", "IT", "JE", "JP", "NZ", "RU", "SG", "SM", "SW", "TW", "US", "VA"];
+                var currencyCodes = ["AED", "AUD", "CAD", "CHF", "CNY", "DKK", "EUR", "GBP", "HKD", "JPY", "NZD", "RUB", "SEK", "SGD", "TWD", "USD"];
                 var merchantCapabilities = ["supports3DS", "supportsEMV", "supportsCredit", "supportsDebit"];
                 var paymentNetworks = ["amex", "discover", "interac", "masterCard", "privateLabel", "visa"];
 
