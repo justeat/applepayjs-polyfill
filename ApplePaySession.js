@@ -16,9 +16,9 @@
             self.paymentsEnabled = true;
             self.paymentRequest = null;
             self.merchantIdentifier = "";
-            self.supportedVersions = [1, 2];
+            self.supportedVersions = [1, 2, 3];
             self.validationURL = "https://apple-pay-gateway-cert.apple.com/paymentservices/startSession";
-            self.version = 1;
+            self.version = 3;
 
             /**
              * Disables payments with ApplePaySession.
@@ -105,8 +105,8 @@
                     throw "Missing country code.";
                 }
 
-                var countryCodes = ["AU", "CA", "CH", "CN", "FR", "GB", "HK", "SG", "US"];
-                var currencyCodes = ["AUD", "CAD", "CHF", "CNY", "EUR", "GBP", "HKD", "SGD", "USD"];
+                var countryCodes = ["AE", "AU", "CA", "CH", "CN", "DK", "ES", "FR", "FI", "GB", "GG", "HK", "IE", "IM", "IT", "JE", "JP", "NZ", "RU", "SG", "SM", "SW", "TW", "US", "VA"];
+                var currencyCodes = ["AED", "AUD", "CAD", "CHF", "CNY", "DKK", "EUR", "GBP", "HKD", "JPY", "NZD", "RUB", "SEK", "SGD", "TWD", "USD"];
                 var merchantCapabilities = ["supports3DS", "supportsEMV", "supportsCredit", "supportsDebit"];
                 var paymentNetworks = ["amex", "discover", "interac", "masterCard", "privateLabel", "visa"];
 
@@ -238,7 +238,7 @@
             };
 
             /**
-             * Callback for ApplePaySession.completePayment().
+             * Callback for ApplePaySession.completePayment() for Apple Pay JS versions 1 and 2.
              * @param {Object} session - The current ApplePaySession.
              * @param {Number} status - The status code passed to the function.
              */
@@ -248,7 +248,17 @@
             };
 
             /**
-             * Callback for ApplePaySession.completePaymentMethodSelection().
+             * Callback for ApplePaySession.completePayment() for Apple Pay JS version 3.
+             * @param {Object} session - The current ApplePaySession.
+             * @param {Object} result - The result of the payment authorization, including its status and list of errors.
+             */
+            self.onCompletePaymentV3 = function (session, result) {
+                self.hasActiveSession = false;
+                self.paymentRequest = null;
+            };
+
+            /**
+             * Callback for ApplePaySession.completePaymentMethodSelection() for Apple Pay JS versions 1 and 2.
              * @param {Object} session - The current ApplePaySession.
              * @param {Object} newTotal - The new total passed to the function.
              * @param {Object} newLineItems - The new line items passed to the function.
@@ -258,7 +268,16 @@
             };
 
             /**
-             * Callback for ApplePaySession.completeShippingContactSelection().
+             * Callback for ApplePaySession.completePaymentMethodSelection() for Apple Pay JS version 3.
+             * @param {Object} session - The current ApplePaySession.
+             * @param {Object} update - The updated payment method.
+             */
+            self.onCompletePaymentMethodSelectionV3 = function (session, update) {
+
+            };
+
+            /**
+             * Callback for ApplePaySession.completeShippingContactSelection() for Apple Pay JS versions 1 and 2.
              * @param {Object} session - The current ApplePaySession.
              * @param {Number} status - The status code passed to the function.
              * @param {Object} newShippingMethods - The new shipping methods passed to the function.
@@ -280,13 +299,41 @@
             };
 
             /**
-             * Callback for ApplePaySession.completeShippingMethodSelection().
+             * Callback for ApplePaySession.completeShippingContactSelection() for Apple Pay JS version 3.
+             * @param {Object} session - The current ApplePaySession.
+             * @param {Object} update - The updated shipping contact.
+             */
+            self.onCompleteShippingContactSelectionV3 = function (session, update) {
+
+                if (!update.errors || update.errors.length === 0) {
+                    var applePayPaymentAuthorizedEvent = {
+                        payment: {
+                            token: self.createPaymentToken(session),
+                            billingContact: self.createBillingContact(session),
+                            shippingContact: self.createShippingContact(session)
+                        }
+                    };
+                    session.onpaymentauthorized(applePayPaymentAuthorizedEvent);
+                }
+            };
+
+            /**
+             * Callback for ApplePaySession.completeShippingMethodSelection() for Apple Pay JS versions 1 and 2.
              * @param {Object} session - The current ApplePaySession.
              * @param {Number} status - The status code passed to the function.
              * @param {Object} newTotal - The new total passed to the function.
              * @param {Object} newLineItems - The new line items passed to the function.
              */
             self.onCompleteShippingMethodSelection = function (session, status, newTotal, newLineItems) {
+
+            };
+
+            /**
+             * Callback for ApplePaySession.completeShippingMethodSelection() for Apple Pay JS version 3.
+             * @param {Object} session - The current ApplePaySession.
+             * @param {Object} update - The updated shipping method.
+             */
+            self.onCompleteShippingMethodSelectionV3 = function (session, update) {
 
             };
 
@@ -330,6 +377,7 @@
             this.onshippingcontactselected = null;
             this.onshippingmethodselected = null;
             this.onvalidatemerchant = null;
+            this.version = version;
 
             ApplePaySessionPolyfill.onInit(this, version, request);
         };
@@ -371,20 +419,50 @@
             ApplePaySessionPolyfill.onCompleteMerchantValidation(this, merchantSession);
         };
 
-        ApplePaySession.prototype.completePayment = function (status) {
-            ApplePaySessionPolyfill.onCompletePayment(this, status);
+        ApplePaySession.prototype.completePayment = function (...args) {
+            if (this.version >= 3) {
+                var result = args[0];
+                ApplePaySessionPolyfill.onCompletePaymentV3(this, result);
+            } else {
+                var status = args[0];
+                ApplePaySessionPolyfill.onCompletePayment(this, status);
+            }
         };
 
-        ApplePaySession.prototype.completePaymentMethodSelection = function (newTotal, newLineItems) {
-            ApplePaySessionPolyfill.onCompletePaymentMethodSelection(this, newTotal, newLineItems);
+        ApplePaySession.prototype.completePaymentMethodSelection = function (...args) {
+            if (this.version >= 3) {
+                var update = args[0];
+                ApplePaySessionPolyfill.onCompletePaymentMethodSelectionV3(this, update);
+            } else {
+                var newTotal = args[0];
+                var newLineItems = args[1];
+                ApplePaySessionPolyfill.onCompletePaymentMethodSelection(this, newTotal, newLineItems);
+            }
         };
 
-        ApplePaySession.prototype.completeShippingContactSelection = function (status, newShippingMethods, newTotal, newLineItems) {
-            ApplePaySessionPolyfill.onCompleteShippingContactSelection(this, status, newShippingMethods, newTotal, newLineItems);
+        ApplePaySession.prototype.completeShippingContactSelection = function (...args) {
+            if (this.version >= 3) {
+                var update = args[0];
+                ApplePaySessionPolyfill.onCompleteShippingContactSelectionV3(this, update);
+            } else {
+                var status = args[0];
+                var newShippingMethods = args[1];
+                var newTotal = args[2];
+                var newLineItems = args[3];
+                ApplePaySessionPolyfill.onCompleteShippingContactSelection(this, status, newShippingMethods, newTotal, newLineItems);
+            }
         };
 
-        ApplePaySession.prototype.completeShippingMethodSelection = function (status, newTotal, newLineItems) {
-            ApplePaySessionPolyfill.onCompleteShippingMethodSelection(this, status, newTotal, newLineItems);
+        ApplePaySession.prototype.completeShippingMethodSelection = function (...args) {
+            if (this.version >= 3) {
+                var update = args[0];
+                ApplePaySessionPolyfill.onCompleteShippingMethodSelectionV3(this, update);
+            } else {
+                var status = args[0];
+                var newTotal = args[1];
+                var newLineItems = args[2];
+                ApplePaySessionPolyfill.onCompleteShippingMethodSelection(this, status, newTotal, newLineItems);
+            }
         };
     }
 }());
