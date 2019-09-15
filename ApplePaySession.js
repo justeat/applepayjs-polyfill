@@ -16,9 +16,9 @@
             self.paymentsEnabled = true;
             self.paymentRequest = null;
             self.merchantIdentifier = "";
-            self.supportedVersions = [1, 2, 3];
+            self.supportedVersions = [1, 2, 3, 4];
             self.validationURL = "https://apple-pay-gateway-cert.apple.com/paymentservices/startSession";
-            self.version = 3;
+            self.version = 4;
 
             /**
              * Disables payments with ApplePaySession.
@@ -110,8 +110,16 @@
                 var merchantCapabilities = ["supports3DS", "supportsEMV", "supportsCredit", "supportsDebit"];
                 var paymentNetworks = ["amex", "discover", "interac", "masterCard", "privateLabel", "visa"];
 
-                if (version > 1) {
+                if (version >= 2) {
                     paymentNetworks.push("jcb");
+                }
+
+                if (version >= 4) {
+                    paymentNetworks.push("cartesBancaires");
+                    paymentNetworks.push("eftpos");
+                    paymentNetworks.push("electron");
+                    paymentNetworks.push("maestro");
+                    paymentNetworks.push("vPay");
                 }
 
                 if (countryCodes.indexOf(paymentRequest.countryCode) === -1) {
@@ -158,7 +166,13 @@
                     throw "Missing total amount.";
                 }
 
-                if (/^[0-9]+(\.[0-9][0-9])?$/.test(paymentRequest.total.amount) !== true) {
+                var isValidAmount = /^[0-9]+(\.[0-9][0-9])?$/.test(paymentRequest.total.amount);
+
+                if (isValidAmount === true && version < 4) {
+                    isValidAmount = paymentRequest.total.amount !== "0.00";
+                }
+
+                if (isValidAmount !== true) {
                     throw "\"" + paymentRequest.total.amount + "\" is not a valid amount.";
                 }
 
@@ -248,7 +262,7 @@
             };
 
             /**
-             * Callback for ApplePaySession.completePayment() for Apple Pay JS version 3.
+             * Callback for ApplePaySession.completePayment() for Apple Pay JS version 3 and above.
              * @param {Object} session - The current ApplePaySession.
              * @param {Object} result - The result of the payment authorization, including its status and list of errors.
              */
@@ -268,7 +282,7 @@
             };
 
             /**
-             * Callback for ApplePaySession.completePaymentMethodSelection() for Apple Pay JS version 3.
+             * Callback for ApplePaySession.completePaymentMethodSelection() for Apple Pay JS version 3 and above.
              * @param {Object} session - The current ApplePaySession.
              * @param {Object} update - The updated payment method.
              */
@@ -299,7 +313,7 @@
             };
 
             /**
-             * Callback for ApplePaySession.completeShippingContactSelection() for Apple Pay JS version 3.
+             * Callback for ApplePaySession.completeShippingContactSelection() for Apple Pay JS version 3 and above.
              * @param {Object} session - The current ApplePaySession.
              * @param {Object} update - The updated shipping contact.
              */
@@ -329,7 +343,7 @@
             };
 
             /**
-             * Callback for ApplePaySession.completeShippingMethodSelection() for Apple Pay JS version 3.
+             * Callback for ApplePaySession.completeShippingMethodSelection() for Apple Pay JS version 3 and above.
              * @param {Object} session - The current ApplePaySession.
              * @param {Object} update - The updated shipping method.
              */
