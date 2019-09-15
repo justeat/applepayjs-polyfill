@@ -16,9 +16,9 @@
             self.paymentsEnabled = true;
             self.paymentRequest = null;
             self.merchantIdentifier = "";
-            self.supportedVersions = [1, 2, 3, 4];
+            self.supportedVersions = [1, 2, 3, 4, 5];
             self.validationURL = "https://apple-pay-gateway-cert.apple.com/paymentservices/startSession";
-            self.version = 4;
+            self.version = 5;
 
             /**
              * Disables payments with ApplePaySession.
@@ -120,6 +120,11 @@
                     paymentNetworks.push("electron");
                     paymentNetworks.push("maestro");
                     paymentNetworks.push("vPay");
+                }
+
+                if (version >= 5) {
+                    paymentNetworks.push("elo");
+                    paymentNetworks.push("mada");
                 }
 
                 if (countryCodes.indexOf(paymentRequest.countryCode) === -1) {
