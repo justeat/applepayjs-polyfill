@@ -16,9 +16,9 @@
             self.paymentsEnabled = true;
             self.paymentRequest = null;
             self.merchantIdentifier = "";
-            self.supportedVersions = [1, 2, 3, 4, 5];
+            self.supportedVersions = [1, 2, 3, 4, 5, 6];
             self.validationURL = "https://apple-pay-gateway-cert.apple.com/paymentservices/startSession";
-            self.version = 5;
+            self.version = 6;
 
             /**
              * Disables payments with ApplePaySession.
