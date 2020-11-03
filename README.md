@@ -8,9 +8,9 @@ This repository contains a polyfill for [Apple Pay JS](https://developer.apple.c
 
 Apple Pay JS is a way of accepting Apple Pay in websites using Safari in either iOS 10 (and later) and macOS for users who have a TouchID compatible device.
 
-This polyfill provides a way to make [```ApplePaySession```](https://developer.apple.com/reference/applepayjs/applepaysession) available for testing your implementation in browsers that would otherwise not provide support for Apple Pay JS, such as in Chrome on Windows.
+This polyfill provides a way to make [`ApplePaySession`](https://developer.apple.com/reference/applepayjs/applepaysession) available for testing your implementation in browsers that would otherwise not provide support for Apple Pay JS, such as in Chrome on Windows.
 
-The polyfill supports the Apple Pay JS API for versions 1 to 6. The Payment Request API is not supported.
+The polyfill supports the Apple Pay JS API for versions 1 to 10. The Payment Request API is not supported.
 
 ## Examples
 
@@ -26,7 +26,7 @@ Then reference it in your HTML (don't forget to remove it in production environm
 <script src="/lib/applepayjs-polyfill/ApplePaySession.js"></script>
 ```
 
-Next, configure the callbacks on the ```ApplePaySessionPolyfill``` object to return the values you want:
+Next, configure the callbacks on the `ApplePaySessionPolyfill` object to return the values you want:
 
 ```js
 // Set the merchant identifier to drive ApplePaySession.canMakePaymentsWithActiveCard()
@@ -57,7 +57,7 @@ ApplePaySessionPolyfill.createPaymentToken = function (session) {
 };
 ```
 
-Now you should be able to test your implementation of [```ApplePaySession```](https://developer.apple.com/reference/applepayjs/applepaysession) in an HTML page in a browser that does not already provide the object in ```window```.  For example:
+Now you should be able to test your implementation of [`ApplePaySession`](https://developer.apple.com/reference/applepayjs/applepaysession) in an HTML page in a browser that does not already provide the object in `window`.  For example:
 
 ```js
 if ("ApplePaySession" in window && ApplePaySession.canMakePayments() === true) {
@@ -79,7 +79,7 @@ if ("ApplePaySession" in window && ApplePaySession.canMakePayments() === true) {
       }
     };
 
-    var session = new ApplePaySession(6, paymentRequest);
+    var session = new ApplePaySession(10, paymentRequest);
 
     session.onvalidatemerchant = function (event) {
       /* Merchant validation implementation */
@@ -97,15 +97,15 @@ if ("ApplePaySession" in window && ApplePaySession.canMakePayments() === true) {
 
 ### Apple Pay Set Up
 
-If you need to test displaying the "Set Up Apple Pay" button, use the ```setUserSetupStatus(bool)``` function, as shown below, to specify that the user has not yet set up Apple Pay on the device.
+If you need to test displaying the "Set Up Apple Pay" button, use the `setUserSetupStatus(bool)` function, as shown below, to specify that the user has not yet set up Apple Pay on the device.
 
 ```js
 ApplePaySessionPolyfill.setUserSetupStatus(false);
 ```
 
-By default this value is set to ```true``` so that Apple Pay is available in the polyfill.
+By default this value is set to `true` so that Apple Pay is available in the polyfill.
 
-If you need to test compatibility with devices that do not support Apple Pay set up, then delete the function from ```ApplePaySession``` before your implementation code is loaded:
+If you need to test compatibility with devices that do not support Apple Pay set up, then delete the function from `ApplePaySession` before your implementation code is loaded:
 
 ```js
 delete ApplePaySession.openPaymentSetup;

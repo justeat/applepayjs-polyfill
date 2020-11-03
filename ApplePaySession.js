@@ -9,6 +9,7 @@
          */
         ApplePaySessionPolyfill = (function () {
 
+            var latestApplePayVersion = 10;
             var self = {};
 
             self.hasActiveSession = false;
@@ -16,9 +17,15 @@
             self.paymentsEnabled = true;
             self.paymentRequest = null;
             self.merchantIdentifier = "";
-            self.supportedVersions = [1, 2, 3, 4, 5, 6];
+            self.supportedVersions = [];
             self.validationURL = "https://apple-pay-gateway-cert.apple.com/paymentservices/startSession";
-            self.version = 6;
+            self.version = latestApplePayVersion;
+
+            var version;
+
+            for (version = 1; version <= latestApplePayVersion; version++) {
+                self.supportedVersions.push(version);
+            }
 
             /**
              * Disables payments with ApplePaySession.
