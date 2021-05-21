@@ -18,6 +18,7 @@
             self.paymentRequest = null;
             self.merchantIdentifier = "";
             self.supportedVersions = [];
+            self.authorizationTimeout = 0;
             self.validationURL = "https://apple-pay-gateway-cert.apple.com/paymentservices/startSession";
             self.version = latestApplePayVersion;
 
@@ -342,7 +343,8 @@
                             shippingContact: self.createShippingContact(session)
                         }
                     };
-                    session.onpaymentauthorized(applePayPaymentAuthorizedEvent);
+
+                    self.onPaymentAuthorizedWithTimeout(session, applePayPaymentAuthorizedEvent);
                 }
             };
 
@@ -354,6 +356,8 @@
             self.onCompletePayment = function (session, status) {
                 self.hasActiveSession = false;
                 self.paymentRequest = null;
+
+                clearTimeout(self.authorizationTimeout);
             };
 
             /**
@@ -364,6 +368,8 @@
             self.onCompletePaymentV3 = function (session, result) {
                 self.hasActiveSession = false;
                 self.paymentRequest = null;
+
+                clearTimeout(self.authorizationTimeout);
             };
 
             /**
@@ -386,6 +392,19 @@
             };
 
             /**
+             * Callback for ApplePaySession.completePaymentMethodSelection() for Apple Pay JS version 3 and above.
+             * @param {Object} session - The current ApplePaySession.
+             * @param {Object} applePayPaymentAuthorizedEvent - The event sent to onpaymentauthorized.
+             */
+            self.onPaymentAuthorizedWithTimeout = function (session, applePayPaymentAuthorizedEvent) {
+                session.onpaymentauthorized(applePayPaymentAuthorizedEvent);
+
+                self.authorizationTimeout = setTimeout(() => {
+                    alert('ApplePay Not Finished - The site was not able to complete the payment. Please, trye again');
+                }, 30000);
+            };
+
+            /**
              * Callback for ApplePaySession.completeShippingContactSelection() for Apple Pay JS versions 1 and 2.
              * @param {Object} session - The current ApplePaySession.
              * @param {Number} status - The status code passed to the function.
@@ -403,7 +422,8 @@
                             shippingContact: self.createShippingContact(session)
                         }
                     };
-                    session.onpaymentauthorized(applePayPaymentAuthorizedEvent);
+
+                    self.onPaymentAuthorizedWithTimeout(session, applePayPaymentAuthorizedEvent);
                 }
             };
 
@@ -422,7 +442,8 @@
                             shippingContact: self.createShippingContact(session)
                         }
                     };
-                    session.onpaymentauthorized(applePayPaymentAuthorizedEvent);
+
+                    self.onPaymentAuthorizedWithTimeout(session, applePayPaymentAuthorizedEvent);
                 }
             };
 
