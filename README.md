@@ -80,7 +80,7 @@ ApplePaySessionPolyfill.createPaymentToken = function (session) {
         primaryAccountNumberSuffix: '1233',
         deviceAccountIdentifier: '999999999999999',
         deviceAccountNumberSuffix: '9999',
-        activationState: 'activated',
+        activationState: 'activated'
       },
       billingContact: ApplePaySessionPolyfill.createBillingContact()
     },
