@@ -169,7 +169,7 @@ Any feedback or issues can be added to the [issues](https://github.com/justeat/a
 
 ## License
 
-This project is licensed under the [Apache 2.0](https://github.com/justeat/applepayjs-polyfill/blob/master/LICENSE) license.
+This project is licensed under the [Apache 2.0](https://github.com/justeat/applepayjs-polyfill/blob/main/LICENSE) license.
 
 ## External Links
 
