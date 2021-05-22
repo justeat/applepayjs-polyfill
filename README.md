@@ -151,7 +151,9 @@ delete ApplePaySession.openPaymentSetup;
 
 ### Apple Pay Payment Timeout
 
-[Apple Pay documentantion](https://developer.apple.com/documentation/apple_pay_on_the_web/applepaysession/1778020-onpaymentauthorized) says: the `onpaymentauthorized` function must complete the payment and respond by calling `completePayment` before the 30 second timeout, after which a message appears stating that the payment could not be completed.
+The [Apple Pay documentation](https://developer.apple.com/documentation/apple_pay_on_the_web/applepaysession/1778020-onpaymentauthorized) states:
+
+> The `onpaymentauthorized` function must complete the payment and respond by calling `completePayment` before the 30 second timeout, after which a message appears stating that the payment could not be completed.
 
 You can change this timeout with `setAuthorizationTimeout(milliseconds)`.
 
