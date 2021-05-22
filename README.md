@@ -33,26 +33,64 @@ Next, configure the callbacks on the `ApplePaySessionPolyfill` object to return 
 ApplePaySessionPolyfill.setMerchantIdentifier("My_Merchant_Identifier");
 
 // Optionally change the validation URL for merchant validation (the default is the URL for the Apple Pay Sandbox)
-//ApplePaySessionPolyfill.setValidationURL("https://someurl.somedomain.com")
+// ApplePaySessionPolyfill.setValidationURL("https://someurl.somedomain.com")
 
 // Re-declare the function to create a PaymentContact for billing
+// See https://developer.apple.com/documentation/apple_pay_on_the_web/applepaypaymentcontact
+// "phoneticGivenName" and "phoneticFamilyName" fields are available starting in API version 3.
 ApplePaySessionPolyfill.createBillingContact = function (session) {
   return {
-    /* ... */
+    phoneNumber: '(408) 555-5555',
+    emailAddress: 'ravipatel@example.com',
+    givenName: 'Ravi',
+    familyName: 'Patel',
+    phoneticGivenName: 'Ravi',
+    phoneticFamilyName: 'Patel',
+    addressLines: [
+      'Address Line 1',
+      'Address Line 2'
+    ],
+    subLocality: '',
+    locality: 'Cupertino',
+    postalCode: '95014-2083',
+    subAdministrativeArea: '',
+    administrativeArea: 'CA',
+    country: 'United States"',
+    countryCode: 'US'
   };
 };
 
 // Re-declare the function to create a PaymentContact for shipping
+// You can copy the same interface from "createBillingContact";
 ApplePaySessionPolyfill.createShippingContact = function (session) {
-  return {
-    /* ... */
-  };
+  return ApplePaySessionPolyfill.createBillingContact();
 };
 
 // Re-declare the function to create a PaymentToken for an authorized payment
+// See https://developer.apple.com/documentation/apple_pay_on_the_web/applepaypaymenttoken
+// and https://developer.apple.com/documentation/apple_pay_on_the_web/applepaypaymentmethod
 ApplePaySessionPolyfill.createPaymentToken = function (session) {
   return {
-    /* ... */
+    paymentMethod: {
+      displayName: 'Visa 1233',
+      network: 'visa',
+      type: 'credit',
+      paymentPass: {
+        primaryAccountIdentifier: 'AAAAAAAAAAAA',
+        primaryAccountNumberSuffix: '1233',
+        deviceAccountIdentifier: '999999999999999',
+        deviceAccountNumberSuffix: '9999',
+        activationState: 'activated'
+      },
+      billingContact: ApplePaySessionPolyfill.createBillingContact()
+    },
+    transactionIdentifier: '999999999999999',
+    paymentData: {
+      signature: 'AAAAAAAAAAAA',
+      header: 'AAAAAAAAAAAA',
+      version: 'FAKE_v1',
+      data: 'AAAAAAAAAAAA999999999999999AAAAAAAAAAAA999999999999999'
+    }
   };
 };
 ```
