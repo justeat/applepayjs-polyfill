@@ -36,8 +36,8 @@ ApplePaySessionPolyfill.setMerchantIdentifier("My_Merchant_Identifier");
 // ApplePaySessionPolyfill.setValidationURL("https://someurl.somedomain.com")
 
 // Re-declare the function to create a PaymentContact for billing
-// Check https://developer.apple.com/documentation/apple_pay_on_the_web/applepaypayment/1916097-shippingcontact
-// "phoneticGivenName" and "phoneticFamilyName" for API Version >= 3
+// See https://developer.apple.com/documentation/apple_pay_on_the_web/applepaypaymentcontact
+// "phoneticGivenName" and "phoneticFamilyName" fields are available starting in API version 3.
 ApplePaySessionPolyfill.createBillingContact = function (session) {
   return {
     givenName: 'Ravi',
