@@ -56,7 +56,7 @@ ApplePaySessionPolyfill.createBillingContact = function (session) {
     subAdministrativeArea: '',
     administrativeArea: 'CA',
     country: 'United States"',
-    countryCode: 'US',
+    countryCode: 'US'
   };
 };
 
