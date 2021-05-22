@@ -89,7 +89,7 @@ ApplePaySessionPolyfill.createPaymentToken = function (session) {
       signature: 'AAAAAAAAAAAA',
       header: 'AAAAAAAAAAAA',
       version: 'FAKE_v1',
-      data: 'AAAAAAAAAAAA999999999999999AAAAAAAAAAAA999999999999999',
+      data: 'AAAAAAAAAAAA999999999999999AAAAAAAAAAAA999999999999999'
     }
   };
 };
