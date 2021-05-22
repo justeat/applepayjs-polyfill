@@ -40,12 +40,12 @@ ApplePaySessionPolyfill.setMerchantIdentifier("My_Merchant_Identifier");
 // "phoneticGivenName" and "phoneticFamilyName" fields are available starting in API version 3.
 ApplePaySessionPolyfill.createBillingContact = function (session) {
   return {
+    phoneNumber: '(408) 555-5555',
+    emailAddress: 'ravipatel@example.com',
     givenName: 'Ravi',
     familyName: 'Patel',
     phoneticGivenName: 'Ravi',
     phoneticFamilyName: 'Patel',
-    emailAddress: 'ravipatel@example.com',
-    phoneNumber: '(408) 555-5555',
     addressLines: [
       'Address Line 1',
       'Address Line 2'
