@@ -18,7 +18,8 @@
             self.paymentRequest = null;
             self.merchantIdentifier = "";
             self.supportedVersions = [];
-            self.authorizationTimeout = 0;
+            self.authorizationTimeout = 30000;
+            self.authorizationTimeoutId = 0;
             self.validationURL = "https://apple-pay-gateway-cert.apple.com/paymentservices/startSession";
             self.version = latestApplePayVersion;
 
@@ -56,6 +57,14 @@
              */
             self.setUserSetupStatus = function (isSetUp) {
                 self.isApplePaySetUp = isSetUp;
+            };
+
+            /**
+             * Sets the time you must complete the payment after "onpaymentauthorized".
+             * @param {Number} milliseconds - Timeout to use in milliseconds;
+             */
+            self.setAuthorizationTimeout = function (milliseconds) {
+                self.authorizationTimeout = milliseconds;
             };
 
             /**
@@ -357,7 +366,7 @@
                 self.hasActiveSession = false;
                 self.paymentRequest = null;
 
-                clearTimeout(self.authorizationTimeout);
+                clearTimeout(self.authorizationTimeoutId);
             };
 
             /**
@@ -369,7 +378,7 @@
                 self.hasActiveSession = false;
                 self.paymentRequest = null;
 
-                clearTimeout(self.authorizationTimeout);
+                clearTimeout(self.authorizationTimeoutId);
             };
 
             /**
@@ -399,9 +408,9 @@
             self.onPaymentAuthorizedWithTimeout = function (session, applePayPaymentAuthorizedEvent) {
                 session.onpaymentauthorized(applePayPaymentAuthorizedEvent);
 
-                self.authorizationTimeout = setTimeout(() => {
+                self.authorizationTimeoutId = setTimeout(() => {
                     alert('Apple Pay Not Finished - The site was not able to complete the payment. Please, try again.');
-                }, 30000);
+                }, self.authorizationTimeout);
             };
 
             /**
