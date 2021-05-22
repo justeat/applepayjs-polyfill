@@ -401,7 +401,7 @@
             };
 
             /**
-             * Callback for ApplePaySession.completePaymentMethodSelection() for Apple Pay JS version 3 and above.
+             * Used internally to set the payment timeout before calling "onpaymentauthorized".
              * @param {Object} session - The current ApplePaySession.
              * @param {Object} applePayPaymentAuthorizedEvent - The event sent to onpaymentauthorized.
              */
