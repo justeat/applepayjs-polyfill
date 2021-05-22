@@ -67,8 +67,8 @@ ApplePaySessionPolyfill.createShippingContact = function (session) {
 };
 
 // Re-declare the function to create a PaymentToken for an authorized payment
-// Check: https://developer.apple.com/documentation/apple_pay_on_the_web/applepaypaymenttoken
-// Check: https://developer.apple.com/documentation/apple_pay_on_the_web/applepaypaymentmethod
+// See https://developer.apple.com/documentation/apple_pay_on_the_web/applepaypaymenttoken
+// and https://developer.apple.com/documentation/apple_pay_on_the_web/applepaypaymentmethod
 ApplePaySessionPolyfill.createPaymentToken = function (session) {
   return {
     paymentMethod: {
