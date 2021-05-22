@@ -60,8 +60,8 @@
             };
 
             /**
-             * Sets the time you must complete the payment after "onpaymentauthorized".
-             * @param {Number} milliseconds - Timeout to use in milliseconds;
+             * Sets the time you must complete the payment with after "onpaymentauthorized" is called.
+             * @param {Number} milliseconds - Timeout to use in milliseconds.
              */
             self.setAuthorizationTimeout = function (milliseconds) {
                 self.authorizationTimeout = milliseconds;
