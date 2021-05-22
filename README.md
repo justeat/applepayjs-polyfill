@@ -161,7 +161,7 @@ You can change this timeout with `setAuthorizationTimeout(milliseconds)`.
 ApplePaySessionPolyfill.setAuthorizationTimeout(1000);
 ```
 
-By default this value is set to 30000 milliseconds (30 seconds) on polyfill like in the Apple Pay session.
+By default this value is set to 30000 milliseconds (30 seconds) in the polyfill like in a real Apple Pay session.
 
 ## Feedback
 
