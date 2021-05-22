@@ -149,6 +149,20 @@ If you need to test compatibility with devices that do not support Apple Pay set
 delete ApplePaySession.openPaymentSetup;
 ```
 
+### Apple Pay Payment Timeout
+
+The [Apple Pay documentation](https://developer.apple.com/documentation/apple_pay_on_the_web/applepaysession/1778020-onpaymentauthorized) states:
+
+> The `onpaymentauthorized` function must complete the payment and respond by calling `completePayment` before the 30 second timeout, after which a message appears stating that the payment could not be completed.
+
+You can change this timeout with `setAuthorizationTimeout(milliseconds)`.
+
+```js
+ApplePaySessionPolyfill.setAuthorizationTimeout(1000);
+```
+
+By default this value is set to 30000 milliseconds (30 seconds) in the polyfill like in a real Apple Pay session.
+
 ## Feedback
 
 Any feedback or issues can be added to the [issues](https://github.com/justeat/applepayjs-polyfill/issues) for this project in GitHub.

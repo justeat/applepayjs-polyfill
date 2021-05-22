@@ -18,6 +18,8 @@
             self.paymentRequest = null;
             self.merchantIdentifier = "";
             self.supportedVersions = [];
+            self.authorizationTimeout = 30000;
+            self.authorizationTimeoutId = 0;
             self.validationURL = "https://apple-pay-gateway-cert.apple.com/paymentservices/startSession";
             self.version = latestApplePayVersion;
 
@@ -55,6 +57,14 @@
              */
             self.setUserSetupStatus = function (isSetUp) {
                 self.isApplePaySetUp = isSetUp;
+            };
+
+            /**
+             * Sets the time you must complete the payment with after "onpaymentauthorized" is called.
+             * @param {Number} milliseconds - Timeout to use in milliseconds.
+             */
+            self.setAuthorizationTimeout = function (milliseconds) {
+                self.authorizationTimeout = milliseconds;
             };
 
             /**
@@ -342,7 +352,8 @@
                             shippingContact: self.createShippingContact(session)
                         }
                     };
-                    session.onpaymentauthorized(applePayPaymentAuthorizedEvent);
+
+                    self.onPaymentAuthorizedWithTimeout(session, applePayPaymentAuthorizedEvent);
                 }
             };
 
@@ -354,6 +365,8 @@
             self.onCompletePayment = function (session, status) {
                 self.hasActiveSession = false;
                 self.paymentRequest = null;
+
+                clearTimeout(self.authorizationTimeoutId);
             };
 
             /**
@@ -364,6 +377,8 @@
             self.onCompletePaymentV3 = function (session, result) {
                 self.hasActiveSession = false;
                 self.paymentRequest = null;
+
+                clearTimeout(self.authorizationTimeoutId);
             };
 
             /**
@@ -386,6 +401,19 @@
             };
 
             /**
+             * Used internally to set the payment timeout before calling "onpaymentauthorized".
+             * @param {Object} session - The current ApplePaySession.
+             * @param {Object} applePayPaymentAuthorizedEvent - The event sent to onpaymentauthorized.
+             */
+            self.onPaymentAuthorizedWithTimeout = function (session, applePayPaymentAuthorizedEvent) {
+                session.onpaymentauthorized(applePayPaymentAuthorizedEvent);
+
+                self.authorizationTimeoutId = setTimeout(() => {
+                    alert('Apple Pay Not Finished - The site was not able to complete the payment. Please, try again.');
+                }, self.authorizationTimeout);
+            };
+
+            /**
              * Callback for ApplePaySession.completeShippingContactSelection() for Apple Pay JS versions 1 and 2.
              * @param {Object} session - The current ApplePaySession.
              * @param {Number} status - The status code passed to the function.
@@ -403,7 +431,8 @@
                             shippingContact: self.createShippingContact(session)
                         }
                     };
-                    session.onpaymentauthorized(applePayPaymentAuthorizedEvent);
+
+                    self.onPaymentAuthorizedWithTimeout(session, applePayPaymentAuthorizedEvent);
                 }
             };
 
@@ -422,7 +451,8 @@
                             shippingContact: self.createShippingContact(session)
                         }
                     };
-                    session.onpaymentauthorized(applePayPaymentAuthorizedEvent);
+
+                    self.onPaymentAuthorizedWithTimeout(session, applePayPaymentAuthorizedEvent);
                 }
             };
 
