@@ -400,7 +400,7 @@
                 session.onpaymentauthorized(applePayPaymentAuthorizedEvent);
 
                 self.authorizationTimeout = setTimeout(() => {
-                    alert('ApplePay Not Finished - The site was not able to complete the payment. Please, trye again');
+                    alert('Apple Pay Not Finished - The site was not able to complete the payment. Please, try again.');
                 }, 30000);
             };
 
