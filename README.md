@@ -84,12 +84,16 @@ ApplePaySessionPolyfill.createPaymentToken = function (session) {
       },
       billingContact: ApplePaySessionPolyfill.createBillingContact()
     },
-    transactionIdentifier: '999999999999999',
+    transactionIdentifier: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
     paymentData: {
-      signature: 'AAAAAAAAAAAA',
-      header: 'AAAAAAAAAAAA',
-      version: 'FAKE_v1',
-      data: 'AAAAAAAAAAAA999999999999999AAAAAAAAAAAA999999999999999'
+      data: "aAa9A9aA9aA9aAa9+9aAAA999a9aAA/AaAAA9A9AaaaAa9+AAAaAaaa9AaaA99AaAA9Aa9aAA+aAaA9AaAAAA==",
+      signature: "AAAAAAaAAAa9AAAAAaAAAAAAAAAaAaAAAaaaaaaAAAAAAaAAAAAAAaaaaaaA9a9AAaAAAAAAAAAA9aAA==",
+      header: {
+        publicKeyHash: "aaaaAA99aaA9aaa99A9Aaa9Aa9aaaa9A9a9AAAaaAaA=",
+        ephemeralPublicKey: "AAaaAaAAAaAAaa9AAAAAAaAAaa9AAAaAAaAAAa9/99AaAaAaaAaaAaA9AaAaaaAa+aAaa==",
+        transactionId: "a9a9a9a99aa99999999a99a9aaa999aaa9aa99aa99a9a99aaa99999aaa9aa99a"
+      },
+      version: "FAKE_v1"
     }
   };
 };
