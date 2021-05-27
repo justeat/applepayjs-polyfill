@@ -346,7 +346,9 @@
              */
             self.onCompleteMerchantValidation = function (session, merchantSession) {
 
-                if (typeof session.onshippingcontactselected === "function") {
+                var hasPostalAdress = self.paymentRequest && ("requiredShippingContactFields" in self.paymentRequest) && ("postalAddress" in self.paymentRequest.requiredShippingContactFields);
+
+                if (typeof session.onshippingcontactselected === "function" && hasPostalAdress) {
 
                     var applePayShippingContactSelectedEvent = {
                         shippingContact: self.createShippingContact(session)
