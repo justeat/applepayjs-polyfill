@@ -354,7 +354,7 @@
                         shippingContact: self.createShippingContact(session)
                     };
 
-                    self.onShippingContactSelectedWithTimeout(session, applePayShippingContactSelectedEvent)
+                    self.onShippingContactSelectedWithTimeout(session, applePayShippingContactSelectedEvent);
                 } else {
                     var applePayPaymentAuthorizedEvent = {
                         payment: {
