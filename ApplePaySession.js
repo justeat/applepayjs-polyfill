@@ -18,8 +18,9 @@
             self.paymentRequest = null;
             self.merchantIdentifier = "";
             self.supportedVersions = [];
+            self.shippingContactTimeout = 30000;
             self.authorizationTimeout = 30000;
-            self.authorizationTimeoutId = 0;
+            self.activityTimeoutId = 0;
             self.validationURL = "https://apple-pay-gateway-cert.apple.com/paymentservices/startSession";
             self.version = latestApplePayVersion;
 
@@ -57,6 +58,14 @@
              */
             self.setUserSetupStatus = function (isSetUp) {
                 self.isApplePaySetUp = isSetUp;
+            };
+
+            /**
+             * Sets the time you must complete the shipping contanct selection with after "onshippingcontactselected" is called.
+             * @param {Number} milliseconds - Timeout to use in milliseconds.
+             */
+            self.setShippingContactTimeout = function (milliseconds) {
+                self.shippingContactTimeout = milliseconds;
             };
 
             /**
@@ -337,13 +346,15 @@
              */
             self.onCompleteMerchantValidation = function (session, merchantSession) {
 
-                if (typeof session.onshippingcontactselected === "function") {
+                var hasPostalAdress = self.paymentRequest && ("requiredShippingContactFields" in self.paymentRequest) && ("postalAddress" in self.paymentRequest.requiredShippingContactFields);
+
+                if (typeof session.onshippingcontactselected === "function" && hasPostalAdress) {
 
                     var applePayShippingContactSelectedEvent = {
                         shippingContact: self.createShippingContact(session)
                     };
 
-                    session.onshippingcontactselected(applePayShippingContactSelectedEvent);
+                    self.onShippingContactSelectedWithTimeout(session, applePayShippingContactSelectedEvent);
                 } else {
                     var applePayPaymentAuthorizedEvent = {
                         payment: {
@@ -366,7 +377,7 @@
                 self.hasActiveSession = false;
                 self.paymentRequest = null;
 
-                clearTimeout(self.authorizationTimeoutId);
+                clearTimeout(self.activityTimeoutId);
             };
 
             /**
@@ -378,7 +389,7 @@
                 self.hasActiveSession = false;
                 self.paymentRequest = null;
 
-                clearTimeout(self.authorizationTimeoutId);
+                clearTimeout(self.activityTimeoutId);
             };
 
             /**
@@ -401,6 +412,19 @@
             };
 
             /**
+             * Used internally to set the contact shipping selection timeout before calling "onshippingcontactselected".
+             * @param {Object} session - The current ApplePaySession.
+             * @param {Object} applePayShippingContactSelectedEvent - The event sent to onshippingcontactselected.
+             */
+            self.onShippingContactSelectedWithTimeout = function (session, applePayShippingContactSelectedEvent) {
+                session.onshippingcontactselected(applePayShippingContactSelectedEvent);
+
+                self.activityTimeoutId = setTimeout(() => {
+                    alert('Apple Pay Not Finished - The site was not able to complete the payment. Please, try again.');
+                }, self.shippingContactTimeout);
+            };
+
+            /**
              * Used internally to set the payment timeout before calling "onpaymentauthorized".
              * @param {Object} session - The current ApplePaySession.
              * @param {Object} applePayPaymentAuthorizedEvent - The event sent to onpaymentauthorized.
@@ -408,7 +432,7 @@
             self.onPaymentAuthorizedWithTimeout = function (session, applePayPaymentAuthorizedEvent) {
                 session.onpaymentauthorized(applePayPaymentAuthorizedEvent);
 
-                self.authorizationTimeoutId = setTimeout(() => {
+                self.activityTimeoutId = setTimeout(() => {
                     alert('Apple Pay Not Finished - The site was not able to complete the payment. Please, try again.');
                 }, self.authorizationTimeout);
             };
@@ -422,6 +446,7 @@
              * @param {Object} newLineItems - The new line items passed to the function.
              */
             self.onCompleteShippingContactSelection = function (session, status, newShippingMethods, newTotal, newLineItems) {
+                clearTimeout(self.activityTimeoutId);
 
                 if (status === ApplePaySession.STATUS_SUCCESS) {
                     var applePayPaymentAuthorizedEvent = {
@@ -442,6 +467,7 @@
              * @param {Object} update - The updated shipping contact.
              */
             self.onCompleteShippingContactSelectionV3 = function (session, update) {
+                clearTimeout(self.activityTimeoutId);
 
                 if (!update.errors || update.errors.length === 0) {
                     var applePayPaymentAuthorizedEvent = {
